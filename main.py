@@ -4,15 +4,12 @@ import random
 from io import BytesIO
 from PIL import Image, ImageTk
 import pygame
-#import RPi.GPIO as GPIO  # GPIO-Bibliothek importieren
 
-# Liste von Links
 links = [
     "https://youtu.be/dQw4w9WgXcQ",
     "https://app.food2050.ch/de/toni-areal/mensa/food-profile/2024-12-09-mittagsverpflegung-simply-good"
 ]
 
-# Initialisierung des Sounds
 pygame.mixer.init()
 pygame.mixer.music.load("geld_sound.mp3")
 
@@ -20,30 +17,20 @@ pygame.mixer.music.load("geld_sound.mp3")
 
 ctk.set_appearance_mode("light")
 
-# GPIO Setup (auskommentiert)
-# GPIO.setmode(GPIO.BCM)  # Wir verwenden die BCM-Nummerierung
-# LIGHT_SENSOR_PIN = 16  # GPIO Pin 16
-# GPIO.setup(LIGHT_SENSOR_PIN, GPIO.IN)  # Sensor als Eingang setzen
-
-# Hauptanwendungsklasse
 class QRCodeApp:
     def __init__(self, root):
         self.root = root
         self.root.title("")
         self.root.geometry("600x700")
 
-        # Vollbild-Status
         self.fullscreen = False
 
-        # QR-Code Anzeige
         self.qr_label = ctk.CTkLabel(self.root, text="")
         self.qr_label.place(relx=0.5, rely=0.6, anchor="center")
 
-        # Countdown Anzeige
         self.countdown_label = ctk.CTkLabel(self.root, text="", font=("Helvetica", 32, "bold"), text_color="black")
         self.countdown_label.place(relx=0.5, rely=0.9, anchor="center")
 
-        # Herz-Animation (GIF)
         self.heart_gif = Image.open("herz.gif")
         self.heart_frames = []
         self.load_heart_frames()
@@ -52,7 +39,6 @@ class QRCodeApp:
         self.heart_label = ctk.CTkLabel(self.root, text="")
         self.heart_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Text-GIF über dem QR-Code
         self.text_gif = Image.open("text_animation.gif")
         self.text_gif_frames = []
         self.load_text_gif_frames()
@@ -61,18 +47,12 @@ class QRCodeApp:
         self.text_gif_label = ctk.CTkLabel(self.root, text="")
         self.text_gif_label.place(relx=0.5, rely=0.2, anchor="center")
 
-        # Countdown Zeit
         self.countdown_time =5
 
-        # Event-Bindungen
-        self.root.bind('<F11>', self.toggle_fullscreen)  # F11-Taste
-        self.root.bind('<Return>', self.start_sequence)  # Enter-Taste
+        self.root.bind('<F11>', self.toggle_fullscreen)  
+        self.root.bind('<Return>', self.start_sequence)  
 
-        # Starten der Herz-Animation sofort
         self.animate_gif()
-
-        # Ereignis für Lichtschranken-Sensor (auskommentiert)
-        # GPIO.add_event_detect(LIGHT_SENSOR_PIN, GPIO.RISING, callback=self.start_sequence, bouncetime=200)
 
     def load_heart_frames(self):
         try:
@@ -86,7 +66,7 @@ class QRCodeApp:
     def load_text_gif_frames(self):
         try:
             while True:
-                frame = self.text_gif.copy().resize((700, 500))  # Größe des Text-GIFs
+                frame = self.text_gif.copy().resize((700, 500))  
                 self.text_gif_frames.append(ImageTk.PhotoImage(frame))
                 self.text_gif.seek(self.text_gif.tell() + 1)
         except EOFError:
@@ -121,24 +101,21 @@ class QRCodeApp:
         self.qr_label.configure(image=ctk_image)
         self.qr_label.image = ctk_image
 
-        # Text-GIF aktivieren
         self.text_gif_label.place(relx=0.5, rely=0.2, anchor="center")
         self.text_gif_active = True
         self.animate_text_gif()
 
-        # Starten des Countdowns
         self.start_countdown(5)
 
     def animate_text_gif(self):
         if not self.text_gif_active:
-            return  # Animation stoppen, wenn nicht aktiv
+            return 
         try:
             frame = self.text_gif_frames[self.text_gif_frame_index]
             self.text_gif_frame_index = (self.text_gif_frame_index + 1) % len(self.text_gif_frames)
             self.text_gif_label.configure(image=frame)
             self.text_gif_label.image = frame
 
-            # Timer speichern, um ihn später abzubrechen
             self.text_gif_animation_id = self.root.after(200, self.animate_text_gif)
         except IndexError:
             pass
@@ -159,18 +136,16 @@ class QRCodeApp:
     def reset_sequence(self):
         self.qr_label.configure(image=None)
         self.qr_label.image = None
-        self.text_gif_label.configure(image=None)  # Entfernt das Bild des Text-GIFs
-        self.text_gif_label.image = None           # Entfernt die Referenz
+        self.text_gif_label.configure(image=None)  
+        self.text_gif_label.image = None           
         self.countdown_label.configure(text="")
         self.heart_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # Text-GIF deaktivieren und Timer abbrechen
         self.text_gif_active = False
         if self.text_gif_animation_id is not None:
             self.root.after_cancel(self.text_gif_animation_id)
             self.text_gif_animation_id = None
 
-        # Text-GIF-Label unsichtbar machen
         self.text_gif_label.place_forget()
 
     def animate_gif(self):
@@ -179,15 +154,10 @@ class QRCodeApp:
             self.heart_frame_index = (self.heart_frame_index + 1) % len(self.heart_frames)
             self.heart_label.configure(image=frame)
             self.heart_label.image = frame
-            self.root.after(400, self.animate_gif)  # Schnellerer Wechsel
+            self.root.after(400, self.animate_gif)  
         except IndexError:
             pass
 
-
-# Anwendung starten
 root = ctk.CTk()
 app = QRCodeApp(root)
 root.mainloop()
-
-# GPIO sauber aufräumen, wenn das Programm beendet wird (auskommentiert)
-# GPIO.cleanup()
